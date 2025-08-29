@@ -18,9 +18,14 @@ from app.bot.middlewares.statistics import ActivityCounterMiddleware
 from app.infrastructure.database.connection import get_pg_pool
 from config.config import Config
 from redis.asyncio import Redis
+from dotenv import load_dotenv
+import os
 
 logger = logging.getLogger(__name__)
 
+load_dotenv()
+
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
 # Функция конфигурирования и запуска бота
 async def main(config: Config) -> None:
@@ -56,6 +61,13 @@ async def main(config: Config) -> None:
     translations = get_translations()
     # формируем список локалей из ключей словаря с переводами
     locales = list(translations.keys())
+
+    dp.workflow_data.update(
+        admin_id=ADMIN_ID,
+        translations=translations,
+        locales=locales,
+        db_pool=db_pool
+    )
 
     # Подключаем роутеры в нужном порядке
     logger.info("Including routers...")
